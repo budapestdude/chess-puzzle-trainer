@@ -1,0 +1,373 @@
+/* Mobile Styles for Profile Page */
+
+@media (max-width: 768px) {
+    body {
+        margin: 0;
+        padding: 0;
+        min-height: 100vh;
+    }
+    
+    .container {
+        padding: 10px;
+        max-width: 100%;
+    }
+    
+    /* Mobile header */
+    .header {
+        padding: 12px;
+        margin-bottom: 15px;
+        border-radius: 12px;
+    }
+    
+    .header h1 {
+        font-size: 24px;
+        margin-bottom: 5px;
+    }
+    
+    .nav {
+        display: flex;
+        gap: 8px;
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+        padding: 4px 0;
+    }
+    
+    .nav-btn {
+        padding: 8px 16px;
+        font-size: 13px;
+        white-space: nowrap;
+        flex-shrink: 0;
+    }
+    
+    /* Mobile profile layout */
+    .profile-layout {
+        grid-template-columns: 1fr;
+        gap: 15px;
+    }
+    
+    /* Profile sidebar becomes top section on mobile */
+    .profile-sidebar {
+        padding: 20px;
+        margin-bottom: 15px;
+        border-radius: 16px;
+    }
+    
+    .profile-header {
+        flex-direction: column;
+        align-items: center;
+        text-align: center;
+        gap: 15px;
+    }
+    
+    .profile-avatar {
+        width: 80px;
+        height: 80px;
+        font-size: 32px;
+    }
+    
+    .profile-info h2 {
+        font-size: 22px;
+    }
+    
+    .profile-title {
+        font-size: 14px;
+    }
+    
+    .profile-stats {
+        grid-template-columns: 1fr 1fr;
+        gap: 10px;
+        margin-top: 20px;
+    }
+    
+    .stat-item {
+        padding: 12px;
+        border-radius: 10px;
+    }
+    
+    .stat-value {
+        font-size: 20px;
+    }
+    
+    .stat-label {
+        font-size: 11px;
+    }
+    
+    /* Content sections */
+    .content-section {
+        padding: 20px;
+        margin-bottom: 20px;
+        border-radius: 16px;
+    }
+    
+    .section-title {
+        font-size: 18px;
+        margin-bottom: 15px;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+    
+    /* Statistics grid */
+    .stats-grid {
+        grid-template-columns: 1fr 1fr;
+        gap: 10px;
+    }
+    
+    .stats-card {
+        padding: 12px;
+        border-radius: 10px;
+    }
+    
+    .stats-card-value {
+        font-size: 18px;
+    }
+    
+    .stats-card-label {
+        font-size: 11px;
+    }
+    
+    /* Achievement grid */
+    .achievement-grid {
+        grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
+        gap: 10px;
+    }
+    
+    .achievement-item {
+        padding: 10px;
+        border-radius: 10px;
+    }
+    
+    .achievement-icon {
+        font-size: 28px;
+    }
+    
+    .achievement-name {
+        font-size: 10px;
+        margin-top: 4px;
+    }
+    
+    /* Activity list */
+    .activity-item {
+        padding: 12px;
+        margin-bottom: 8px;
+        border-radius: 10px;
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 8px;
+    }
+    
+    .activity-icon {
+        font-size: 20px;
+    }
+    
+    .activity-text {
+        font-size: 13px;
+    }
+    
+    .activity-time {
+        font-size: 11px;
+    }
+    
+    /* Sound settings */
+    .toggle-switch {
+        width: 50px;
+        height: 26px;
+    }
+    
+    .toggle-slider:before {
+        width: 20px;
+        height: 20px;
+        left: 3px;
+        bottom: 3px;
+    }
+    
+    input:checked + .toggle-slider:before {
+        transform: translateX(24px);
+    }
+    
+    /* Volume slider */
+    input[type="range"] {
+        height: 4px;
+    }
+    
+    input[type="range"]::-webkit-slider-thumb {
+        width: 16px;
+        height: 16px;
+    }
+    
+    input[type="range"]::-moz-range-thumb {
+        width: 16px;
+        height: 16px;
+    }
+    
+    /* Progress bars */
+    .progress-bar {
+        height: 6px;
+        border-radius: 3px;
+    }
+    
+    /* Mobile-specific utilities */
+    .mobile-hidden {
+        display: none !important;
+    }
+    
+    .mobile-only {
+        display: block !important;
+    }
+    
+    /* Touch-friendly spacing */
+    button, .btn, a {
+        min-height: 44px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+    
+    /* Sticky mobile navigation */
+    .mobile-bottom-nav {
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        background: linear-gradient(135deg, #0a0a0a 0%, #1a1a1a 100%);
+        border-top: 1px solid rgba(0, 212, 255, 0.2);
+        display: flex;
+        justify-content: space-around;
+        padding: 8px 0 env(safe-area-inset-bottom);
+        z-index: 1000;
+        box-shadow: 0 -2px 20px rgba(0, 0, 0, 0.5);
+    }
+    
+    .mobile-nav-item {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        padding: 8px;
+        background: none;
+        border: none;
+        color: rgba(255, 255, 255, 0.6);
+        font-size: 11px;
+        transition: all 0.2s ease;
+    }
+    
+    .mobile-nav-item.active {
+        color: var(--primary);
+    }
+    
+    .mobile-nav-item-icon {
+        font-size: 20px;
+        margin-bottom: 4px;
+    }
+    
+    /* Add bottom padding to account for fixed nav */
+    .profile-content {
+        padding-bottom: 80px;
+    }
+}
+
+/* Landscape mobile */
+@media (max-width: 896px) and (orientation: landscape) {
+    .profile-header {
+        flex-direction: row;
+        text-align: left;
+    }
+    
+    .profile-avatar {
+        width: 60px;
+        height: 60px;
+        font-size: 24px;
+    }
+    
+    .profile-stats {
+        grid-template-columns: repeat(4, 1fr);
+    }
+    
+    .stats-grid {
+        grid-template-columns: repeat(3, 1fr);
+    }
+    
+    .achievement-grid {
+        grid-template-columns: repeat(auto-fill, minmax(70px, 1fr));
+    }
+}
+
+/* Small phones */
+@media (max-width: 375px) {
+    .header h1 {
+        font-size: 20px;
+    }
+    
+    .profile-info h2 {
+        font-size: 18px;
+    }
+    
+    .section-title {
+        font-size: 16px;
+    }
+    
+    .stats-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .achievement-grid {
+        grid-template-columns: repeat(auto-fill, minmax(70px, 1fr));
+    }
+}
+
+/* Touch feedback */
+@media (hover: none) and (pointer: coarse) {
+    .nav-btn:active,
+    .btn:active,
+    .mobile-nav-item:active {
+        transform: scale(0.95);
+        opacity: 0.8;
+    }
+    
+    .achievement-item:active,
+    .stats-card:active {
+        transform: scale(0.98);
+        background: rgba(255, 255, 255, 0.08);
+    }
+}
+
+/* Dark mode optimizations */
+@media (prefers-color-scheme: dark) {
+    .content-section {
+        background: rgba(0, 0, 0, 0.6);
+    }
+    
+    .mobile-bottom-nav {
+        background: rgba(0, 0, 0, 0.95);
+    }
+}
+
+/* High contrast mode */
+@media (prefers-contrast: high) {
+    .content-section,
+    .profile-sidebar,
+    .stat-item,
+    .stats-card {
+        border: 2px solid currentColor;
+    }
+}
+
+/* Reduced motion */
+@media (prefers-reduced-motion: reduce) {
+    * {
+        animation: none !important;
+        transition: none !important;
+    }
+}
+
+/* Safe areas for modern phones */
+@supports (padding: max(0px)) {
+    .container {
+        padding-left: max(10px, env(safe-area-inset-left));
+        padding-right: max(10px, env(safe-area-inset-right));
+    }
+    
+    .mobile-bottom-nav {
+        padding-bottom: max(8px, env(safe-area-inset-bottom));
+    }
+}
