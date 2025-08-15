@@ -1,9 +1,9 @@
 // Sound Manager for Chess Puzzle Trainer
+// Only plays sounds during puzzle solving (move, capture, correct, incorrect)
 class SoundManager {
     constructor() {
         this.enabled = localStorage.getItem('soundEnabled') !== 'false';
-        this.volume = parseFloat(localStorage.getItem('soundVolume') || '0.5');
-        this.sounds = {};
+        this.volume = parseFloat(localStorage.getItem('soundVolume') || '0.3');
         this.audioContext = null;
         
         // Initialize sounds
@@ -11,39 +11,68 @@ class SoundManager {
     }
 
     initializeSounds() {
-        // We'll use Web Audio API to generate sounds programmatically
-        // This avoids needing external sound files
+        // Use Web Audio API to generate chess-themed sounds
         try {
             this.audioContext = new (window.AudioContext || window.webkitAudioContext)();
             
-            // Define sound configurations
+            // Chess-themed sound configurations
             this.soundConfigs = {
-                move: { frequency: 400, duration: 0.1, type: 'sine' },
-                capture: { frequency: 600, duration: 0.15, type: 'square', volume: 0.3 },
-                correct: { frequency: 800, duration: 0.3, type: 'sine', secondFreq: 1000 },
-                incorrect: { frequency: 200, duration: 0.3, type: 'sawtooth' },
-                gameStart: { frequency: 523, duration: 0.2, type: 'sine', secondFreq: 659 },
-                gameEnd: { frequency: 659, duration: 0.4, type: 'sine', secondFreq: 523 },
-                tick: { frequency: 1000, duration: 0.05, type: 'square', volume: 0.2 },
-                achievement: { frequency: 523, duration: 0.5, type: 'sine', melody: true }
+                // Piece movement sound - like wood on wood
+                move: { 
+                    frequency: 220, 
+                    duration: 0.08, 
+                    type: 'sine',
+                    envelope: 'quick',
+                    volume: 0.4
+                },
+                
+                // Capture sound - slightly sharper than move
+                capture: { 
+                    frequency: 330, 
+                    duration: 0.12, 
+                    type: 'triangle',
+                    envelope: 'sharp',
+                    volume: 0.5,
+                    secondFreq: 165
+                },
+                
+                // Correct puzzle solution - pleasant chime
+                correct: { 
+                    frequencies: [523.25, 659.25, 783.99], // C, E, G major chord
+                    duration: 0.4, 
+                    type: 'sine',
+                    envelope: 'smooth',
+                    volume: 0.3
+                },
+                
+                // Incorrect move - subtle warning
+                incorrect: { 
+                    frequencies: [233.08, 220], // Bb to A (minor second)
+                    duration: 0.3, 
+                    type: 'sine',
+                    envelope: 'fade',
+                    volume: 0.25
+                }
             };
         } catch (e) {
             console.warn('Web Audio API not supported:', e);
             this.enabled = false;
         }
-        
-        console.log('SoundManager initialized, enabled:', this.enabled);
     }
 
     playSound(soundName) {
+        // Only allow puzzle-related sounds
+        const allowedSounds = ['move', 'capture', 'correct', 'incorrect'];
+        if (!allowedSounds.includes(soundName)) return;
+        
         if (!this.enabled || !this.audioContext) return;
         
         const config = this.soundConfigs[soundName];
         if (!config) return;
 
         try {
-            if (config.melody) {
-                this.playMelody(soundName);
+            if (config.frequencies) {
+                this.playChord(config);
             } else if (config.secondFreq) {
                 this.playDoubleNote(config);
             } else {
@@ -58,47 +87,103 @@ class SoundManager {
         const oscillator = this.audioContext.createOscillator();
         const gainNode = this.audioContext.createGain();
         
-        oscillator.connect(gainNode);
+        // Add a subtle filter for more realistic sound
+        const filter = this.audioContext.createBiquadFilter();
+        filter.type = 'lowpass';
+        filter.frequency.value = 2000;
+        
+        oscillator.connect(filter);
+        filter.connect(gainNode);
         gainNode.connect(this.audioContext.destination);
         
         oscillator.type = config.type;
         oscillator.frequency.value = config.frequency;
         
         const volume = (config.volume || 1) * this.volume;
-        gainNode.gain.setValueAtTime(volume, this.audioContext.currentTime);
-        gainNode.gain.exponentialRampToValueAtTime(0.01, this.audioContext.currentTime + config.duration);
+        const now = this.audioContext.currentTime;
         
-        oscillator.start();
-        oscillator.stop(this.audioContext.currentTime + config.duration);
+        // Apply envelope
+        switch(config.envelope) {
+            case 'quick':
+                gainNode.gain.setValueAtTime(0, now);
+                gainNode.gain.linearRampToValueAtTime(volume, now + 0.01);
+                gainNode.gain.exponentialRampToValueAtTime(0.01, now + config.duration);
+                break;
+            case 'sharp':
+                gainNode.gain.setValueAtTime(volume, now);
+                gainNode.gain.exponentialRampToValueAtTime(0.01, now + config.duration);
+                break;
+            case 'smooth':
+                gainNode.gain.setValueAtTime(0, now);
+                gainNode.gain.linearRampToValueAtTime(volume, now + config.duration * 0.1);
+                gainNode.gain.linearRampToValueAtTime(volume * 0.7, now + config.duration * 0.3);
+                gainNode.gain.exponentialRampToValueAtTime(0.01, now + config.duration);
+                break;
+            case 'fade':
+                gainNode.gain.setValueAtTime(volume, now);
+                gainNode.gain.linearRampToValueAtTime(volume * 0.5, now + config.duration * 0.5);
+                gainNode.gain.exponentialRampToValueAtTime(0.01, now + config.duration);
+                break;
+            default:
+                gainNode.gain.setValueAtTime(volume, now);
+                gainNode.gain.exponentialRampToValueAtTime(0.01, now + config.duration);
+        }
+        
+        oscillator.start(now);
+        oscillator.stop(now + config.duration);
     }
 
     playDoubleNote(config) {
-        // Play two notes in sequence for correct/incorrect sounds
+        // For capture sound - play two quick notes
         this.playNote(config);
         setTimeout(() => {
             this.playNote({
                 ...config,
-                frequency: config.secondFreq
+                frequency: config.secondFreq,
+                duration: config.duration * 0.7
             });
-        }, config.duration * 500);
+        }, config.duration * 200);
     }
 
-    playMelody(soundName) {
-        // Play achievement melody
-        const notes = [523, 659, 784, 1047]; // C, E, G, C (octave higher)
-        notes.forEach((freq, index) => {
+    playChord(config) {
+        // For correct/incorrect - play multiple frequencies
+        const now = this.audioContext.currentTime;
+        
+        config.frequencies.forEach((freq, index) => {
             setTimeout(() => {
-                this.playNote({
-                    frequency: freq,
-                    duration: 0.15,
-                    type: 'sine',
-                    volume: 0.5
-                });
-            }, index * 150);
+                const oscillator = this.audioContext.createOscillator();
+                const gainNode = this.audioContext.createGain();
+                const filter = this.audioContext.createBiquadFilter();
+                
+                filter.type = 'lowpass';
+                filter.frequency.value = 3000;
+                
+                oscillator.connect(filter);
+                filter.connect(gainNode);
+                gainNode.connect(this.audioContext.destination);
+                
+                oscillator.type = config.type;
+                oscillator.frequency.value = freq;
+                
+                const volume = (config.volume || 1) * this.volume * (1 - index * 0.1);
+                
+                if (config.envelope === 'smooth') {
+                    gainNode.gain.setValueAtTime(0, now);
+                    gainNode.gain.linearRampToValueAtTime(volume, now + 0.05);
+                    gainNode.gain.linearRampToValueAtTime(volume * 0.8, now + config.duration * 0.5);
+                    gainNode.gain.exponentialRampToValueAtTime(0.01, now + config.duration);
+                } else {
+                    gainNode.gain.setValueAtTime(volume, now);
+                    gainNode.gain.exponentialRampToValueAtTime(0.01, now + config.duration);
+                }
+                
+                oscillator.start(now);
+                oscillator.stop(now + config.duration);
+            }, index * 50); // Slight delay between notes for arpeggio effect
         });
     }
 
-    // Chess-specific sounds
+    // Chess-specific sound methods for puzzle solving only
     playMove() {
         this.playSound('move');
     }
@@ -115,30 +200,14 @@ class SoundManager {
         this.playSound('incorrect');
     }
 
-    playGameStart() {
-        this.playSound('gameStart');
-    }
-
-    playGameEnd() {
-        this.playSound('gameEnd');
-    }
-
-    playTick() {
-        this.playSound('tick');
-    }
-
-    playAchievement() {
-        this.playSound('achievement');
-    }
-
     // Settings management
     toggle() {
         this.enabled = !this.enabled;
         localStorage.setItem('soundEnabled', this.enabled);
         
-        // Play a sound to indicate the toggle
+        // Play a move sound to indicate the toggle
         if (this.enabled) {
-            this.playSound('gameStart');
+            this.playSound('move');
         }
         
         return this.enabled;
