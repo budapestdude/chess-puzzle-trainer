@@ -2737,7 +2737,7 @@ function resetRushMode() {
     document.getElementById('rushTimer').textContent = '0:00';
 }
 
-// Sound toggle functionality
+// Sound toggle functionality - Define at top level
 function setupSoundToggle() {
     const soundToggle = document.getElementById('soundToggle');
     console.log('Setting up sound toggle, button found:', !!soundToggle);
@@ -2774,8 +2774,7 @@ function updateSoundButtonText() {
     }
 }
 
-
-// Board settings functionality
+// Board settings functionality - Define at top level
 function setupBoardSettings() {
     const settingsBtn = document.getElementById('settingsBtn');
     const settingsModal = document.getElementById('settingsModal');
@@ -2842,15 +2841,23 @@ function populateSettingsModal() {
     populateAnimationSpeeds();
     
     // Set current values
-    document.getElementById('pieceSetSelect').value = settings.pieceSet;
-    document.getElementById('boardSizeSelect').value = settings.boardSize;
-    document.getElementById('animationSpeedSelect').value = settings.animationSpeed;
-    document.getElementById('showCoordinatesToggle').checked = settings.showCoordinates;
-    document.getElementById('highlightMovesToggle').checked = settings.highlightMoves;
+    const pieceSetSelect = document.getElementById('pieceSetSelect');
+    const boardSizeSelect = document.getElementById('boardSizeSelect');
+    const animationSpeedSelect = document.getElementById('animationSpeedSelect');
+    const showCoordinatesToggle = document.getElementById('showCoordinatesToggle');
+    const highlightMovesToggle = document.getElementById('highlightMovesToggle');
+    
+    if (pieceSetSelect) pieceSetSelect.value = settings.pieceSet;
+    if (boardSizeSelect) boardSizeSelect.value = settings.boardSize;
+    if (animationSpeedSelect) animationSpeedSelect.value = settings.animationSpeed;
+    if (showCoordinatesToggle) showCoordinatesToggle.checked = settings.showCoordinates;
+    if (highlightMovesToggle) highlightMovesToggle.checked = settings.highlightMoves;
 }
 
 function populateThemeGrid() {
     const themeGrid = document.getElementById('themeGrid');
+    if (!themeGrid) return;
+    
     const themes = boardCustomization.getThemes();
     const currentTheme = boardCustomization.getSettings().boardTheme;
     
@@ -2884,20 +2891,14 @@ function populateThemeGrid() {
             populateThemeGrid(); // Refresh to show new selection
         });
         
-        themeOption.addEventListener('mouseenter', () => {
-            themeOption.style.transform = 'scale(1.05)';
-        });
-        
-        themeOption.addEventListener('mouseleave', () => {
-            themeOption.style.transform = 'scale(1)';
-        });
-        
         themeGrid.appendChild(themeOption);
     });
 }
 
 function populatePieceSets() {
     const select = document.getElementById('pieceSetSelect');
+    if (!select) return;
+    
     const pieceSets = boardCustomization.getPieceSets();
     
     select.innerHTML = '';
@@ -2911,6 +2912,8 @@ function populatePieceSets() {
 
 function populateBoardSizes() {
     const select = document.getElementById('boardSizeSelect');
+    if (!select) return;
+    
     const boardSizes = boardCustomization.getBoardSizes();
     
     select.innerHTML = '';
@@ -2924,6 +2927,8 @@ function populateBoardSizes() {
 
 function populateAnimationSpeeds() {
     const select = document.getElementById('animationSpeedSelect');
+    if (!select) return;
+    
     const speeds = boardCustomization.getAnimationSpeeds();
     
     select.innerHTML = '';
@@ -2937,77 +2942,101 @@ function populateAnimationSpeeds() {
 
 function setupSettingsEventListeners() {
     // Piece set change
-    document.getElementById('pieceSetSelect').addEventListener('change', (e) => {
-        boardCustomization.updateSetting('pieceSet', e.target.value);
-    });
+    const pieceSetSelect = document.getElementById('pieceSetSelect');
+    if (pieceSetSelect) {
+        pieceSetSelect.addEventListener('change', (e) => {
+            boardCustomization.updateSetting('pieceSet', e.target.value);
+        });
+    }
     
     // Board size change
-    document.getElementById('boardSizeSelect').addEventListener('change', (e) => {
-        boardCustomization.updateSetting('boardSize', e.target.value);
-    });
+    const boardSizeSelect = document.getElementById('boardSizeSelect');
+    if (boardSizeSelect) {
+        boardSizeSelect.addEventListener('change', (e) => {
+            boardCustomization.updateSetting('boardSize', e.target.value);
+        });
+    }
     
     // Animation speed change
-    document.getElementById('animationSpeedSelect').addEventListener('change', (e) => {
-        boardCustomization.updateSetting('animationSpeed', e.target.value);
-    });
+    const animationSpeedSelect = document.getElementById('animationSpeedSelect');
+    if (animationSpeedSelect) {
+        animationSpeedSelect.addEventListener('change', (e) => {
+            boardCustomization.updateSetting('animationSpeed', e.target.value);
+        });
+    }
     
     // Show coordinates toggle
-    document.getElementById('showCoordinatesToggle').addEventListener('change', (e) => {
-        boardCustomization.updateSetting('showCoordinates', e.target.checked);
-    });
+    const showCoordinatesToggle = document.getElementById('showCoordinatesToggle');
+    if (showCoordinatesToggle) {
+        showCoordinatesToggle.addEventListener('change', (e) => {
+            boardCustomization.updateSetting('showCoordinates', e.target.checked);
+        });
+    }
     
     // Highlight moves toggle
-    document.getElementById('highlightMovesToggle').addEventListener('change', (e) => {
-        boardCustomization.updateSetting('highlightMoves', e.target.checked);
-    });
+    const highlightMovesToggle = document.getElementById('highlightMovesToggle');
+    if (highlightMovesToggle) {
+        highlightMovesToggle.addEventListener('change', (e) => {
+            boardCustomization.updateSetting('highlightMoves', e.target.checked);
+        });
+    }
     
     // Reset settings
-    document.getElementById('resetSettingsBtn').addEventListener('click', () => {
-        if (confirm('Reset all board settings to defaults?')) {
-            boardCustomization.resetToDefaults();
-            populateSettingsModal(); // Refresh the modal
-        }
-    });
-    
-    // Export settings
-    document.getElementById('exportSettingsBtn').addEventListener('click', () => {
-        const settings = boardCustomization.exportSettings();
-        const blob = new Blob([settings], { type: 'application/json' });
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = 'chess-board-settings.json';
-        a.click();
-        URL.revokeObjectURL(url);
-    });
-    
-    // Import settings
-    document.getElementById('importSettingsBtn').addEventListener('click', () => {
-        const input = document.createElement('input');
-        input.type = 'file';
-        input.accept = '.json';
-        input.addEventListener('change', (e) => {
-            const file = e.target.files[0];
-            if (file) {
-                const reader = new FileReader();
-                reader.onload = (e) => {
-                    try {
-                        const success = boardCustomization.importSettings(e.target.result);
-                        if (success) {
-                            populateSettingsModal(); // Refresh the modal
-                            alert('Settings imported successfully!');
-                        } else {
-                            alert('Failed to import settings. Please check the file format.');
-                        }
-                    } catch (error) {
-                        alert('Error reading file: ' + error.message);
-                    }
-                };
-                reader.readAsText(file);
+    const resetSettingsBtn = document.getElementById('resetSettingsBtn');
+    if (resetSettingsBtn) {
+        resetSettingsBtn.addEventListener('click', () => {
+            if (confirm('Reset all board settings to defaults?')) {
+                boardCustomization.resetToDefaults();
+                populateSettingsModal(); // Refresh the modal
             }
         });
-        input.click();
-    });
+    }
+    
+    // Export settings
+    const exportSettingsBtn = document.getElementById('exportSettingsBtn');
+    if (exportSettingsBtn) {
+        exportSettingsBtn.addEventListener('click', () => {
+            const settings = boardCustomization.exportSettings();
+            const blob = new Blob([settings], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'chess-board-settings.json';
+            a.click();
+            URL.revokeObjectURL(url);
+        });
+    }
+    
+    // Import settings
+    const importSettingsBtn = document.getElementById('importSettingsBtn');
+    if (importSettingsBtn) {
+        importSettingsBtn.addEventListener('click', () => {
+            const input = document.createElement('input');
+            input.type = 'file';
+            input.accept = '.json';
+            input.addEventListener('change', (e) => {
+                const file = e.target.files[0];
+                if (file) {
+                    const reader = new FileReader();
+                    reader.onload = (e) => {
+                        try {
+                            const success = boardCustomization.importSettings(e.target.result);
+                            if (success) {
+                                populateSettingsModal(); // Refresh the modal
+                                alert('Settings imported successfully!');
+                            } else {
+                                alert('Failed to import settings. Please check the file format.');
+                            }
+                        } catch (error) {
+                            alert('Error reading file: ' + error.message);
+                        }
+                    };
+                    reader.readAsText(file);
+                }
+            });
+            input.click();
+        });
+    }
 }
 
 document.addEventListener('DOMContentLoaded', initializeTraining);
