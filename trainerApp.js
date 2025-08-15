@@ -294,6 +294,7 @@ async function initializeTraining() {
     setupEventListeners();
     setupAuthEventListeners();
     setupThemeToggle();
+    setupSoundToggle();
     
     // Initialize rush mode buttons
     if (typeof initRushMode === 'function') {
@@ -1432,6 +1433,13 @@ function onDrop(source, target) {
     
     if (move === null) return 'snapback';
     
+    // Play move sound
+    if (move.captured) {
+        soundManager.playCapture();
+    } else {
+        soundManager.playMove();
+    }
+    
     const isCorrect = checkMove(move);
     addMoveToHistory(move.san, isCorrect);
     
@@ -1680,6 +1688,9 @@ function makeComputerMove() {
 function puzzleSolved() {
     stopTimer();
     
+    // Play success sound
+    soundManager.playCorrect();
+    
     // Handle rush mode separately
     if (rushModeState && rushModeState.active) {
         handleRushPuzzleSolved();
@@ -1800,6 +1811,9 @@ function puzzleSolved() {
 }
 
 function puzzleFailed() {
+    // Play failure sound
+    soundManager.playIncorrect();
+    
     // Handle rush mode
     if (rushModeState.active) {
         handleRushPuzzleFailed();
@@ -2708,6 +2722,27 @@ function resetRushMode() {
     
     document.getElementById('rushScore').textContent = '0';
     document.getElementById('rushTimer').textContent = '0:00';
+}
+
+// Sound toggle functionality
+function setupSoundToggle() {
+    const soundToggle = document.getElementById('soundToggle');
+    if (soundToggle) {
+        // Set initial state
+        updateSoundButtonText();
+        
+        soundToggle.addEventListener('click', () => {
+            const isEnabled = soundManager.toggle();
+            updateSoundButtonText();
+        });
+    }
+}
+
+function updateSoundButtonText() {
+    const soundToggle = document.getElementById('soundToggle');
+    if (soundToggle) {
+        soundToggle.textContent = soundManager.isEnabled() ? '🔊 Sound' : '🔇 Sound';
+    }
 }
 
 document.addEventListener('DOMContentLoaded', initializeTraining);

@@ -871,7 +871,16 @@
         </div>
     </div>
 
+    <script src="soundManager.js"></script>
     <script>
+        // Initialize sound manager
+        document.addEventListener('DOMContentLoaded', () => {
+            // Play game start sound when page loads
+            setTimeout(() => {
+                soundManager.playGameStart();
+            }, 1000);
+        });
+
         // Create floating particles
         function createParticles() {
             const container = document.getElementById('particles');
