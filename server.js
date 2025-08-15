@@ -342,7 +342,18 @@ app.get('/api/puzzles/random', async (req, res) => {
         const themes = req.query.themes ? req.query.themes.split(',') : null;
         
         const puzzle = await db.getRandomPuzzle(minRating, maxRating, themes);
-        res.json({ success: true, puzzle });
+        
+        if (puzzle) {
+            // Transform puzzle data to match frontend format
+            const transformedPuzzle = {
+                ...puzzle,
+                theme: puzzle.themes ? puzzle.themes.split(' ').filter(t => t.trim()) : ['tactics'],
+                moves: puzzle.moves ? puzzle.moves.split(' ').filter(m => m.trim()) : []
+            };
+            res.json({ success: true, puzzle: transformedPuzzle });
+        } else {
+            res.json({ success: true, puzzle: null });
+        }
     } catch (error) {
         if (isDevelopment) console.error('Get random puzzle error:', error);
         res.status(500).json({ error: error.message });

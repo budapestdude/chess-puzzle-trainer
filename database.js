@@ -28,6 +28,8 @@ class Database {
                     console.log('Connected to SQLite database at:', dbPath);
                 }
                 this.createTables();
+                // Initialize puzzles after tables are created
+                setTimeout(() => this.initializePuzzles(), 1000);
             }
         });
     }
@@ -675,6 +677,68 @@ class Database {
                     return;
                 }
                 resolve(rows);
+            });
+        });
+    }
+
+    async addPuzzle(puzzleData) {
+        return new Promise((resolve, reject) => {
+            const query = `
+                INSERT OR IGNORE INTO puzzles (puzzle_id, fen, moves, rating, rating_deviation, popularity, nb_plays, themes, game_url, opening_tags)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            `;
+            
+            this.db.run(query, [
+                puzzleData.puzzle_id || puzzleData.id,
+                puzzleData.fen,
+                Array.isArray(puzzleData.moves) ? puzzleData.moves.join(' ') : puzzleData.moves,
+                puzzleData.rating || 1500,
+                puzzleData.rating_deviation || 150,
+                puzzleData.popularity || 90,
+                puzzleData.nb_plays || 1000,
+                puzzleData.themes || (Array.isArray(puzzleData.theme) ? puzzleData.theme.join(' ') : 'tactics'),
+                puzzleData.game_url || '',
+                puzzleData.opening_tags || ''
+            ], function(err) {
+                if (err) {
+                    reject(err);
+                    return;
+                }
+                resolve(this.lastID);
+            });
+        });
+    }
+
+    async initializePuzzles() {
+        return new Promise((resolve, reject) => {
+            // Check if puzzles already exist
+            this.db.get('SELECT COUNT(*) as count FROM puzzles', [], async (err, row) => {
+                if (err) {
+                    reject(err);
+                    return;
+                }
+
+                if (row.count > 0) {
+                    console.log(`Database already has ${row.count} puzzles`);
+                    resolve(row.count);
+                    return;
+                }
+
+                // Import puzzles from matesIn2Database
+                try {
+                    const matesIn2Database = require('./matesIn2Database.js');
+                    console.log(`Importing ${matesIn2Database.length} mate-in-2 puzzles...`);
+                    
+                    for (const puzzle of matesIn2Database) {
+                        await this.addPuzzle(puzzle);
+                    }
+                    
+                    console.log(`Successfully imported ${matesIn2Database.length} puzzles`);
+                    resolve(matesIn2Database.length);
+                } catch (error) {
+                    console.error('Failed to import puzzles:', error);
+                    reject(error);
+                }
             });
         });
     }

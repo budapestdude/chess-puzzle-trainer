@@ -1274,8 +1274,16 @@ function updatePuzzleInfo() {
     board.orientation(game.turn() === 'w' ? 'white' : 'black');
     
     const themeText = currentPuzzle.theme.map(t => themes[t] || t).join(', ');
-    document.getElementById('puzzleTheme').textContent = themeText;
-    document.getElementById('puzzleDescription').textContent = currentPuzzle.description;
+    const themeElement = document.getElementById('puzzleTheme');
+    if (themeElement) {
+        themeElement.textContent = themeText;
+    }
+    
+    // Note: puzzleDescription element doesn't exist in HTML, so removing this line
+    // const descElement = document.getElementById('puzzleDescription');
+    // if (descElement && currentPuzzle.description) {
+    //     descElement.textContent = currentPuzzle.description;
+    // }
 }
 
 function updateModeSpecificUI() {
