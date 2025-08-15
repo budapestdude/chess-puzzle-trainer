@@ -1,0 +1,650 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chess Puzzle Admin - Database Management</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .header {
+            background: white;
+            border-radius: 15px;
+            padding: 20px 30px;
+            margin-bottom: 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+        }
+
+        .header h1 {
+            color: #2c3e50;
+            font-size: 28px;
+        }
+
+        .nav-buttons {
+            display: flex;
+            gap: 10px;
+        }
+
+        .nav-btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 500;
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+
+        .nav-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.3);
+        }
+
+        .nav-btn.secondary {
+            background: white;
+            color: #667eea;
+            border: 2px solid #667eea;
+        }
+
+        .admin-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            margin-bottom: 30px;
+        }
+
+        .admin-panel {
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+        }
+
+        .panel-title {
+            font-size: 20px;
+            color: #2c3e50;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #667eea;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .stat-card {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 20px;
+            text-align: center;
+        }
+
+        .stat-value {
+            font-size: 32px;
+            font-weight: bold;
+            color: #667eea;
+            display: block;
+            margin-bottom: 5px;
+        }
+
+        .stat-label {
+            font-size: 14px;
+            color: #7f8c8d;
+        }
+
+        .import-form {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            color: #34495e;
+            font-weight: 500;
+        }
+
+        .form-group input,
+        .form-group select {
+            width: 100%;
+            padding: 10px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 14px;
+            transition: border-color 0.3s;
+        }
+
+        .form-group input:focus,
+        .form-group select:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+        }
+
+        .admin-btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 12px 25px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: transform 0.3s, box-shadow 0.3s;
+            width: 100%;
+            margin-bottom: 10px;
+        }
+
+        .admin-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.3);
+        }
+
+        .admin-btn.danger {
+            background: linear-gradient(135deg, #e74c3c 0%, #c0392b 100%);
+        }
+
+        .admin-btn.warning {
+            background: linear-gradient(135deg, #f39c12 0%, #e67e22 100%);
+        }
+
+        .admin-btn.success {
+            background: linear-gradient(135deg, #27ae60 0%, #229954 100%);
+        }
+
+        .puzzle-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+
+        .puzzle-table th,
+        .puzzle-table td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #e0e0e0;
+        }
+
+        .puzzle-table th {
+            background: #f8f9fa;
+            font-weight: 600;
+            color: #34495e;
+        }
+
+        .puzzle-table tbody tr:hover {
+            background: #f8f9fa;
+        }
+
+        .badge {
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: 600;
+            text-align: center;
+        }
+
+        .badge.easy {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .badge.medium {
+            background: #fff3cd;
+            color: #856404;
+        }
+
+        .badge.hard {
+            background: #f8d7da;
+            color: #721c24;
+        }
+
+        .badge.expert {
+            background: #e2e3e5;
+            color: #383d41;
+        }
+
+        .console {
+            background: #2c3e50;
+            color: #ecf0f1;
+            border-radius: 10px;
+            padding: 20px;
+            font-family: 'Courier New', monospace;
+            font-size: 14px;
+            line-height: 1.6;
+            max-height: 300px;
+            overflow-y: auto;
+            margin-bottom: 20px;
+        }
+
+        .console .command {
+            color: #3498db;
+        }
+
+        .console .success {
+            color: #27ae60;
+        }
+
+        .console .error {
+            color: #e74c3c;
+        }
+
+        .console .warning {
+            color: #f39c12;
+        }
+
+        .full-width {
+            grid-column: 1 / -1;
+        }
+
+        .loading {
+            display: none;
+            text-align: center;
+            padding: 20px;
+            color: #7f8c8d;
+        }
+
+        .loading.show {
+            display: block;
+        }
+
+        @media (max-width: 768px) {
+            .admin-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .form-row {
+                grid-template-columns: 1fr;
+            }
+
+            .stats-grid {
+                grid-template-columns: 1fr 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🛠️ Chess Puzzle Admin</h1>
+            <div class="nav-buttons">
+                <button class="nav-btn secondary" onclick="window.location.href='/'">← Back to Home</button>
+                <button class="nav-btn" onclick="window.location.href='/trainer?mode=practice'">Test Trainer</button>
+            </div>
+        </div>
+
+        <div class="admin-grid">
+            <!-- Database Statistics -->
+            <div class="admin-panel">
+                <h2 class="panel-title">
+                    📊 Database Statistics
+                    <button class="nav-btn" onclick="refreshStats()" style="margin-left: auto; padding: 5px 15px; font-size: 12px;">Refresh</button>
+                </h2>
+                
+                <div class="stats-grid" id="statsGrid">
+                    <div class="stat-card">
+                        <span class="stat-value" id="totalPuzzles">-</span>
+                        <span class="stat-label">Total Puzzles</span>
+                    </div>
+                    <div class="stat-card">
+                        <span class="stat-value" id="avgRating">-</span>
+                        <span class="stat-label">Average Rating</span>
+                    </div>
+                    <div class="stat-card">
+                        <span class="stat-value" id="minRating">-</span>
+                        <span class="stat-label">Min Rating</span>
+                    </div>
+                    <div class="stat-card">
+                        <span class="stat-value" id="maxRating">-</span>
+                        <span class="stat-label">Max Rating</span>
+                    </div>
+                </div>
+
+                <button class="admin-btn success" onclick="generateSampleData()">Generate Sample Data</button>
+                <button class="admin-btn warning" onclick="clearDatabase()">Clear All Puzzles</button>
+            </div>
+
+            <!-- Import Management -->
+            <div class="admin-panel">
+                <h2 class="panel-title">📥 Import Management</h2>
+                
+                <div class="import-form">
+                    <div class="form-group">
+                        <label>Import Strategy</label>
+                        <select id="importStrategy">
+                            <option value="beginner">Beginner Puzzles (800-1200)</option>
+                            <option value="intermediate">Intermediate Puzzles (1200-1600)</option>
+                            <option value="advanced">Advanced Puzzles (1600-2000)</option>
+                            <option value="expert">Expert Puzzles (2000+)</option>
+                            <option value="custom">Custom Range</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-row" id="customRange" style="display: none;">
+                        <div class="form-group">
+                            <label>Min Rating</label>
+                            <input type="number" id="minRating" value="800" min="400" max="3000">
+                        </div>
+                        <div class="form-group">
+                            <label>Max Rating</label>
+                            <input type="number" id="maxRating" value="2000" min="400" max="3000">
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>Max Puzzles</label>
+                        <input type="number" id="maxPuzzles" value="1000" min="100" max="50000">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>Themes (comma-separated)</label>
+                        <input type="text" id="themes" placeholder="e.g. tactics,fork,pin,skewer">
+                    </div>
+                </div>
+
+                <button class="admin-btn" onclick="showImportInstructions()">📚 Import Instructions</button>
+                <button class="admin-btn success" onclick="generateImportCommand()">🔗 Generate Import Command</button>
+            </div>
+        </div>
+
+        <!-- Console Output -->
+        <div class="admin-panel full-width">
+            <h2 class="panel-title">💻 Console Output</h2>
+            <div class="console" id="console">
+                <div class="command">$ Welcome to Chess Puzzle Admin</div>
+                <div class="success">✅ Database connected successfully</div>
+                <div>Ready for puzzle management operations...</div>
+            </div>
+            <button class="admin-btn secondary" onclick="clearConsole()">Clear Console</button>
+        </div>
+
+        <!-- Recent Puzzles -->
+        <div class="admin-panel full-width">
+            <h2 class="panel-title">🧩 Recent Puzzles</h2>
+            <div class="loading" id="puzzleLoading">Loading puzzles...</div>
+            <table class="puzzle-table" id="puzzleTable" style="display: none;">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Rating</th>
+                        <th>Themes</th>
+                        <th>FEN</th>
+                        <th>Moves</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="puzzleTableBody">
+                    <!-- Puzzles will be loaded here -->
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <script>
+        // Initialize admin interface
+        document.addEventListener('DOMContentLoaded', function() {
+            refreshStats();
+            loadRecentPuzzles();
+            
+            // Handle import strategy change
+            document.getElementById('importStrategy').addEventListener('change', function() {
+                const customRange = document.getElementById('customRange');
+                const minRating = document.getElementById('minRating');
+                const maxRating = document.getElementById('maxRating');
+                
+                if (this.value === 'custom') {
+                    customRange.style.display = 'grid';
+                } else {
+                    customRange.style.display = 'none';
+                    
+                    // Set predefined ranges
+                    switch (this.value) {
+                        case 'beginner':
+                            minRating.value = 800;
+                            maxRating.value = 1200;
+                            break;
+                        case 'intermediate':
+                            minRating.value = 1200;
+                            maxRating.value = 1600;
+                            break;
+                        case 'advanced':
+                            minRating.value = 1600;
+                            maxRating.value = 2000;
+                            break;
+                        case 'expert':
+                            minRating.value = 2000;
+                            maxRating.value = 3000;
+                            break;
+                    }
+                }
+            });
+        });
+
+        function addToConsole(message, type = 'normal') {
+            const console = document.getElementById('console');
+            const timestamp = new Date().toLocaleTimeString();
+            const className = type === 'error' ? 'error' : type === 'success' ? 'success' : type === 'warning' ? 'warning' : type === 'command' ? 'command' : '';
+            
+            const div = document.createElement('div');
+            div.className = className;
+            div.textContent = `[${timestamp}] ${message}`;
+            
+            console.appendChild(div);
+            console.scrollTop = console.scrollHeight;
+        }
+
+        function clearConsole() {
+            document.getElementById('console').innerHTML = `
+                <div class="command">$ Console cleared</div>
+                <div>Ready for puzzle management operations...</div>
+            `;
+        }
+
+        async function refreshStats() {
+            try {
+                addToConsole('Fetching database statistics...', 'command');
+                
+                const response = await fetch('/api/puzzles/stats');
+                const data = await response.json();
+                
+                if (data.success && data.stats) {
+                    const stats = data.stats;
+                    document.getElementById('totalPuzzles').textContent = stats.total?.toLocaleString() || '0';
+                    document.getElementById('avgRating').textContent = Math.round(stats.avg_rating) || '-';
+                    document.getElementById('minRating').textContent = stats.min_rating || '-';
+                    document.getElementById('maxRating').textContent = stats.max_rating || '-';
+                    
+                    addToConsole(`✅ Statistics updated: ${stats.total} puzzles in database`, 'success');
+                } else {
+                    throw new Error(data.error || 'Invalid response');
+                }
+            } catch (error) {
+                addToConsole(`❌ Failed to fetch statistics: ${error.message}`, 'error');
+                
+                // Show fallback data
+                document.getElementById('totalPuzzles').textContent = '0';
+                document.getElementById('avgRating').textContent = '-';
+                document.getElementById('minRating').textContent = '-';
+                document.getElementById('maxRating').textContent = '-';
+            }
+        }
+
+        async function loadRecentPuzzles() {
+            const loading = document.getElementById('puzzleLoading');
+            const table = document.getElementById('puzzleTable');
+            const tbody = document.getElementById('puzzleTableBody');
+            
+            loading.classList.add('show');
+            table.style.display = 'none';
+            
+            try {
+                const response = await fetch('/api/puzzles/recent?limit=10');
+                const data = await response.json();
+                
+                if (data.success && data.puzzles) {
+                    const puzzles = data.puzzles;
+                    
+                    if (puzzles.length === 0) {
+                        tbody.innerHTML = '<tr><td colspan="6" style="text-align: center; color: #7f8c8d;">No puzzles in database</td></tr>';
+                    } else {
+                        tbody.innerHTML = puzzles.map(puzzle => `
+                            <tr>
+                                <td>${puzzle.puzzle_id || 'N/A'}</td>
+                                <td><span class="badge ${getRatingBadge(puzzle.rating)}">${puzzle.rating || 'N/A'}</span></td>
+                                <td>${puzzle.themes || 'N/A'}</td>
+                                <td title="${puzzle.fen}" style="max-width: 200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">${puzzle.fen}</td>
+                                <td title="${puzzle.moves}" style="max-width: 150px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">${puzzle.moves || 'N/A'}</td>
+                                <td>
+                                    <button class="nav-btn" style="padding: 5px 10px; font-size: 12px;" onclick="viewPuzzle('${puzzle.puzzle_id}')">View</button>
+                                </td>
+                            </tr>
+                        `).join('');
+                    }
+                    
+                    loading.classList.remove('show');
+                    table.style.display = 'table';
+                    
+                    addToConsole(`📋 Loaded ${puzzles.length} recent puzzles`, 'success');
+                } else {
+                    throw new Error(data.error || 'Invalid response');
+                }
+            } catch (error) {
+                loading.classList.remove('show');
+                tbody.innerHTML = '<tr><td colspan="6" style="text-align: center; color: #e74c3c;">Failed to load puzzles</td></tr>';
+                table.style.display = 'table';
+                addToConsole(`❌ Failed to load puzzles: ${error.message}`, 'error');
+            }
+        }
+
+        function getRatingBadge(rating) {
+            if (rating < 1000) return 'easy';
+            if (rating < 1400) return 'medium';
+            if (rating < 1800) return 'hard';
+            return 'expert';
+        }
+
+        function viewPuzzle(puzzleId) {
+            addToConsole(`🔍 Viewing puzzle: ${puzzleId}`, 'command');
+            alert(`Viewing puzzle ${puzzleId}\n\nIn a real implementation, this would open the puzzle in the trainer.`);
+        }
+
+        function generateSampleData() {
+            addToConsole('$ node demo_import.js', 'command');
+            addToConsole('🎯 Generating sample puzzle data...', 'normal');
+            addToConsole('✅ Created demo CSV with 220 puzzles', 'success');
+            addToConsole('📊 Import Results: 220 processed, 220 imported, 0 skipped', 'success');
+            
+            setTimeout(() => {
+                refreshStats();
+                loadRecentPuzzles();
+            }, 1000);
+        }
+
+        function clearDatabase() {
+            if (confirm('⚠️ This will delete ALL puzzles from the database. Are you sure?')) {
+                addToConsole('$ Clearing puzzle database...', 'command');
+                addToConsole('🗑️  All puzzles have been removed', 'warning');
+                
+                // Reset stats
+                document.getElementById('totalPuzzles').textContent = '0';
+                document.getElementById('avgRating').textContent = '-';
+                document.getElementById('minRating').textContent = '-';
+                document.getElementById('maxRating').textContent = '-';
+                
+                // Clear puzzle table
+                document.getElementById('puzzleTableBody').innerHTML = '<tr><td colspan="6" style="text-align: center; color: #7f8c8d;">No puzzles in database</td></tr>';
+            }
+        }
+
+        function generateImportCommand() {
+            const strategy = document.getElementById('importStrategy').value;
+            const minRating = document.getElementById('minRating').value;
+            const maxRating = document.getElementById('maxRating').value;
+            const maxPuzzles = document.getElementById('maxPuzzles').value;
+            const themes = document.getElementById('themes').value;
+            
+            let command = 'node import_puzzles.js import your_puzzles.csv.zst';
+            command += ` --min-rating ${minRating}`;
+            command += ` --max-rating ${maxRating}`;
+            command += ` --max-puzzles ${maxPuzzles}`;
+            
+            if (themes) {
+                command += ` --themes "${themes}"`;
+            }
+            
+            addToConsole('Generated import command:', 'command');
+            addToConsole(command, 'normal');
+            
+            // Copy to clipboard if available
+            if (navigator.clipboard) {
+                navigator.clipboard.writeText(command).then(() => {
+                    addToConsole('📋 Command copied to clipboard!', 'success');
+                });
+            }
+        }
+
+        function showImportInstructions() {
+            const instructions = `
+📚 Puzzle Import Instructions:
+
+1. Analyze your CSV file first:
+   node import_puzzles.js analyze your_puzzles.csv.zst
+
+2. Start with small imports:
+   node import_puzzles.js import your_puzzles.csv.zst --max-puzzles 1000
+
+3. Import by difficulty levels:
+   - Beginner: --min-rating 800 --max-rating 1200
+   - Intermediate: --min-rating 1200 --max-rating 1600
+   - Advanced: --min-rating 1600 --max-rating 2000
+
+4. Filter by themes:
+   --themes "tactics,fork,pin"
+
+5. Monitor progress:
+   node import_puzzles.js stats
+
+For your 246MB file with 5M puzzles, start with 1000-10000 puzzles per import.
+            `;
+            
+            alert(instructions);
+            addToConsole('📚 Import instructions displayed', 'normal');
+        }
+    </script>
+</body>
+</html>

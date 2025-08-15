@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Puzzle Database Manager</title>
+    <link rel="stylesheet" href="import.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>📚 Puzzle Database Manager</h1>
+            <nav>
+                <a href="trainer.html" class="nav-link">← Back to Trainer</a>
+            </nav>
+        </header>
+
+        <div class="main-content">
+            <div class="import-section">
+                <h2>Import Puzzles</h2>
+                
+                <div class="import-tabs">
+                    <button class="tab-btn active" data-tab="file">File Upload</button>
+                    <button class="tab-btn" data-tab="text">Text Input</button>
+                    <button class="tab-btn" data-tab="url">From URL</button>
+                </div>
+
+                <div class="tab-content" id="file-tab">
+                    <div class="upload-area" id="uploadArea">
+                        <svg class="upload-icon" width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                            <polyline points="17 8 12 3 7 8"></polyline>
+                            <line x1="12" y1="3" x2="12" y2="15"></line>
+                        </svg>
+                        <p>Drag & drop puzzle file here</p>
+                        <p class="upload-formats">Supported: JSON, PGN, CSV, TXT</p>
+                        <button class="btn-primary" id="browseBtn">Browse Files</button>
+                        <input type="file" id="fileInput" accept=".json,.pgn,.csv,.txt" hidden>
+                    </div>
+                </div>
+
+                <div class="tab-content" id="text-tab" style="display:none">
+                    <div class="format-selector">
+                        <label>Format:</label>
+                        <select id="textFormat">
+                            <option value="auto">Auto-detect</option>
+                            <option value="json">JSON</option>
+                            <option value="pgn">PGN</option>
+                            <option value="csv">CSV</option>
+                            <option value="lichess">Lichess</option>
+                        </select>
+                    </div>
+                    <textarea id="textInput" placeholder="Paste your puzzle data here..."></textarea>
+                    <button class="btn-primary" id="importTextBtn">Import from Text</button>
+                </div>
+
+                <div class="tab-content" id="url-tab" style="display:none">
+                    <input type="url" id="urlInput" placeholder="Enter URL to puzzle database...">
+                    <button class="btn-primary" id="importUrlBtn">Import from URL</button>
+                    <p class="help-text">Enter a direct link to a puzzle file (JSON, PGN, CSV)</p>
+                </div>
+
+                <div id="importResults" class="import-results" style="display:none">
+                    <h3>Import Results</h3>
+                    <div class="results-content"></div>
+                </div>
+            </div>
+
+            <div class="database-section">
+                <h2>Database Overview</h2>
+                
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-value" id="totalPuzzles">0</div>
+                        <div class="stat-label">Total Puzzles</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value" id="customPuzzles">0</div>
+                        <div class="stat-label">Custom Puzzles</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value" id="builtinPuzzles">0</div>
+                        <div class="stat-label">Built-in Puzzles</div>
+                    </div>
+                </div>
+
+                <div class="database-controls">
+                    <div class="control-group">
+                        <label>Active Database:</label>
+                        <select id="databaseSelector">
+                            <option value="all">All Puzzles</option>
+                            <option value="builtin">Built-in Only</option>
+                            <option value="custom">Custom Only</option>
+                        </select>
+                    </div>
+                    
+                    <div class="control-group">
+                        <button class="btn-secondary" id="validateBtn">🔍 Validate Database</button>
+                        <button class="btn-secondary" id="exportBtn">📥 Export Puzzles</button>
+                        <button class="btn-danger" id="clearCustomBtn">🗑️ Clear Custom</button>
+                    </div>
+                </div>
+
+                <div class="category-breakdown">
+                    <h3>Category Distribution</h3>
+                    <div id="categoryChart"></div>
+                </div>
+
+                <div class="difficulty-breakdown">
+                    <h3>Difficulty Distribution</h3>
+                    <div id="difficultyChart"></div>
+                </div>
+            </div>
+
+            <div class="search-section">
+                <h2>Search & Filter</h2>
+                <div class="search-controls">
+                    <input type="text" id="searchInput" placeholder="Search puzzles...">
+                    <select id="categoryFilter">
+                        <option value="">All Categories</option>
+                        <option value="tactics">Tactics</option>
+                        <option value="positional">Positional</option>
+                        <option value="endgame">Endgame</option>
+                        <option value="opening">Opening</option>
+                    </select>
+                    <select id="difficultyFilter">
+                        <option value="">All Difficulties</option>
+                        <option value="1">Beginner</option>
+                        <option value="2">Intermediate</option>
+                        <option value="3">Advanced</option>
+                    </select>
+                    <button class="btn-primary" id="searchBtn">Search</button>
+                </div>
+                
+                <div id="searchResults" class="search-results"></div>
+            </div>
+        </div>
+
+        <div id="exportModal" class="modal">
+            <div class="modal-content">
+                <span class="close">&times;</span>
+                <h2>Export Puzzles</h2>
+                <div class="export-options">
+                    <label>Format:</label>
+                    <select id="exportFormat">
+                        <option value="json">JSON</option>
+                        <option value="pgn">PGN</option>
+                        <option value="csv">CSV</option>
+                    </select>
+                    <button class="btn-primary" id="downloadExportBtn">Download</button>
+                </div>
+                <div class="export-preview">
+                    <h3>Preview</h3>
+                    <pre id="exportPreview"></pre>
+                </div>
+            </div>
+        </div>
+
+        <div id="validationModal" class="modal">
+            <div class="modal-content">
+                <span class="close">&times;</span>
+                <h2>Database Validation Results</h2>
+                <div id="validationResults"></div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/chess.js/0.10.3/chess.min.js"></script>
+    <script src="puzzleDatabase.js"></script>
+    <script src="puzzleImporter.js"></script>
+    <script src="databaseManager.js"></script>
+    <script src="importApp.js"></script>
+</body>
+</html>

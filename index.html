@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chess Puzzle Trainer</title>
+    <link rel="stylesheet" href="https://unpkg.com/@chrisoakman/chessboardjs@1.0.0/dist/chessboard-1.0.0.min.css">
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <h1>Chess Puzzle Trainer</h1>
+        
+        <div class="puzzle-info">
+            <div class="info-row">
+                <span class="label">Puzzle:</span>
+                <span id="puzzleNumber">1 / 5</span>
+            </div>
+            <div class="info-row">
+                <span class="label">To Move:</span>
+                <span id="sideToMove">White</span>
+            </div>
+            <div class="info-row">
+                <span class="label">Status:</span>
+                <span id="status">Find the best move</span>
+            </div>
+        </div>
+
+        <div id="board" style="width: 500px"></div>
+        
+        <div class="controls">
+            <button id="prevPuzzle" class="btn">Previous</button>
+            <button id="resetPuzzle" class="btn">Reset</button>
+            <button id="showSolution" class="btn">Show Solution</button>
+            <button id="nextPuzzle" class="btn">Next</button>
+        </div>
+
+        <div class="move-history">
+            <h3>Moves</h3>
+            <div id="moveList"></div>
+        </div>
+    </div>
+
+    <!-- Success Notification -->
+    <div class="success-notification" id="successNotification">
+        <span class="success-icon">✓</span>
+        <span id="successMessage">Puzzle solved!</span>
+    </div>
+
+    <!-- Promotion Dialog -->
+    <div class="promotion-overlay" id="promotionOverlay">
+        <div class="promotion-dialog">
+            <div class="promotion-title">Choose promotion piece:</div>
+            <div class="promotion-pieces">
+                <div class="promotion-piece" data-piece="q">♕</div>
+                <div class="promotion-piece" data-piece="r">♖</div>
+                <div class="promotion-piece" data-piece="b">♗</div>
+                <div class="promotion-piece" data-piece="n">♘</div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/chess.js/0.10.3/chess.min.js"></script>
+    <script src="https://unpkg.com/@chrisoakman/chessboardjs@1.0.0/dist/chessboard-1.0.0.min.js"></script>
+    <script src="matesIn2Database.js"></script>
+    <script src="puzzles.js"></script>
+    <script src="app.js"></script>
+</body>
+</html>
