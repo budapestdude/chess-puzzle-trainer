@@ -940,14 +940,39 @@
 
         // Load user data when page loads
         document.addEventListener('DOMContentLoaded', function() {
-            // Initialize managers
-            soundManager = new SoundManager();
-            boardCustomization = new BoardCustomization();
-            
-            loadUserProfile();
-            loadAchievements();
-            loadRecentActivity();
-            setupProfileSettings();
+            try {
+                console.log('Profile page loading...');
+                
+                // Initialize managers
+                soundManager = new SoundManager();
+                boardCustomization = new BoardCustomization();
+                
+                console.log('Managers initialized:', {
+                    soundManager: !!soundManager,
+                    boardCustomization: !!boardCustomization
+                });
+                
+                loadUserProfile();
+                loadAchievements();
+                loadRecentActivity();
+                setupProfileSettings();
+                
+                console.log('Profile setup complete');
+                
+                // Add a simple test to verify everything is working
+                setTimeout(() => {
+                    const testButton = document.getElementById('soundToggleProfile');
+                    if (testButton) {
+                        console.log('✅ Sound button found and ready');
+                    } else {
+                        console.error('❌ Sound button not found');
+                    }
+                }, 1000);
+                
+            } catch (error) {
+                console.error('Error initializing profile page:', error);
+                alert('Error initializing profile: ' + error.message);
+            }
         });
 
         function loadUserProfile() {
@@ -1071,6 +1096,8 @@
         }
 
         function setupProfileSettings() {
+            console.log('Setting up profile settings...');
+            
             // Setup sound toggle
             setupSoundToggleProfile();
             
@@ -1088,16 +1115,29 @@
             
             // Setup display options checkboxes
             setupDisplayOptionsProfile();
+            
+            console.log('Profile settings setup complete');
         }
 
         function setupSoundToggleProfile() {
+            console.log('Setting up sound toggle...');
             const soundToggle = document.getElementById('soundToggleProfile');
             const soundToggleText = document.getElementById('soundToggleText');
             
-            if (!soundToggle || !soundToggleText) return;
+            console.log('Sound elements found:', { 
+                soundToggle: !!soundToggle, 
+                soundToggleText: !!soundToggleText,
+                soundManager: !!soundManager 
+            });
+            
+            if (!soundToggle || !soundToggleText) {
+                console.error('Sound toggle elements not found');
+                return;
+            }
 
             // Update button state
             function updateSoundButton() {
+                console.log('Updating sound button, soundManager.enabled:', soundManager.enabled);
                 if (soundManager.enabled) {
                     soundToggleText.textContent = '🔊 Enabled';
                     soundToggle.classList.remove('disabled');
@@ -1110,8 +1150,14 @@
             updateSoundButton();
 
             soundToggle.addEventListener('click', () => {
-                soundManager.toggleSound();
-                updateSoundButton();
+                console.log('Sound toggle clicked');
+                try {
+                    const newState = soundManager.toggle();
+                    console.log('Sound toggled to:', newState);
+                    updateSoundButton();
+                } catch (error) {
+                    console.error('Error toggling sound:', error);
+                }
             });
         }
 
@@ -1135,8 +1181,13 @@
         }
 
         function setupPieceSetProfile() {
+            console.log('Setting up piece set select...');
             const pieceSelect = document.getElementById('pieceSetProfileSelect');
-            if (!pieceSelect) return;
+            console.log('Piece select element found:', !!pieceSelect);
+            if (!pieceSelect) {
+                console.error('Piece select element not found');
+                return;
+            }
 
             // Populate options
             const pieceSets = [
@@ -1320,6 +1371,21 @@
                 modal.style.display = 'none';
             }
         }
+        
+        // Simple test - add a visible indicator that JavaScript is working
+        setTimeout(() => {
+            const testDiv = document.createElement('div');
+            testDiv.style.cssText = 'position: fixed; top: 10px; right: 10px; background: green; color: white; padding: 10px; z-index: 9999; border-radius: 5px;';
+            testDiv.textContent = 'JS Loaded ✓';
+            document.body.appendChild(testDiv);
+            
+            // Test if buttons work
+            const soundBtn = document.getElementById('soundToggleProfile');
+            if (soundBtn) {
+                soundBtn.style.border = '2px solid lime';
+                console.log('Sound button found and highlighted');
+            }
+        }, 2000);
     </script>
 </body>
 </html>
