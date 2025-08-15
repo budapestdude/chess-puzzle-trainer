@@ -294,8 +294,12 @@ async function initializeTraining() {
     setupEventListeners();
     setupAuthEventListeners();
     setupThemeToggle();
-    setupSoundToggle();
-    setupBoardSettings();
+    
+    // Add delay to ensure all scripts are loaded
+    setTimeout(() => {
+        setupSoundToggle();
+        setupBoardSettings();
+    }, 100);
     
     // Initialize rush mode buttons
     if (typeof initRushMode === 'function') {
@@ -2728,23 +2732,40 @@ function resetRushMode() {
 // Sound toggle functionality
 function setupSoundToggle() {
     const soundToggle = document.getElementById('soundToggle');
+    console.log('Setting up sound toggle, button found:', !!soundToggle);
+    console.log('soundManager available:', typeof soundManager !== 'undefined');
+    
     if (soundToggle) {
         // Set initial state
         updateSoundButtonText();
         
-        soundToggle.addEventListener('click', () => {
-            const isEnabled = soundManager.toggle();
-            updateSoundButtonText();
+        soundToggle.addEventListener('click', (e) => {
+            e.preventDefault();
+            console.log('Sound button clicked');
+            
+            if (typeof soundManager !== 'undefined') {
+                const isEnabled = soundManager.toggle();
+                updateSoundButtonText();
+                console.log('Sound toggled, now enabled:', isEnabled);
+            } else {
+                console.error('soundManager not available');
+                alert('Sound system not available');
+            }
         });
+    } else {
+        console.error('Sound toggle button not found');
     }
 }
 
 function updateSoundButtonText() {
     const soundToggle = document.getElementById('soundToggle');
-    if (soundToggle) {
-        soundToggle.textContent = soundManager.isEnabled() ? '🔊 Sound' : '🔇 Sound';
+    if (soundToggle && typeof soundManager !== 'undefined') {
+        const isEnabled = soundManager.isEnabled();
+        soundToggle.textContent = isEnabled ? '🔊 Sound' : '🔇 Sound';
+        console.log('Updated sound button text, enabled:', isEnabled);
     }
 }
+
 
 // Board settings functionality
 function setupBoardSettings() {
@@ -2752,15 +2773,24 @@ function setupBoardSettings() {
     const settingsModal = document.getElementById('settingsModal');
     const settingsClose = document.getElementById('settingsClose');
     
+    console.log('Setting up board settings');
+    console.log('Settings button found:', !!settingsBtn);
+    console.log('Settings modal found:', !!settingsModal);
+    console.log('boardCustomization available:', typeof boardCustomization !== 'undefined');
+    
     if (settingsBtn && settingsModal) {
-        settingsBtn.addEventListener('click', () => {
+        settingsBtn.addEventListener('click', (e) => {
+            e.preventDefault();
+            console.log('Settings button clicked');
             settingsModal.style.display = 'flex';
             populateSettingsModal();
         });
         
-        settingsClose.addEventListener('click', () => {
-            settingsModal.style.display = 'none';
-        });
+        if (settingsClose) {
+            settingsClose.addEventListener('click', () => {
+                settingsModal.style.display = 'none';
+            });
+        }
         
         // Close modal when clicking outside
         settingsModal.addEventListener('click', (e) => {
@@ -2770,16 +2800,24 @@ function setupBoardSettings() {
         });
         
         setupSettingsEventListeners();
+    } else {
+        console.error('Settings button or modal not found');
     }
     
     // Apply saved settings on initialization
-    if (window.boardCustomization) {
+    if (typeof boardCustomization !== 'undefined') {
         boardCustomization.applySettings();
+    } else {
+        console.error('boardCustomization not available');
     }
 }
 
 function populateSettingsModal() {
-    if (!window.boardCustomization) return;
+    console.log('Populating settings modal');
+    if (typeof boardCustomization === 'undefined') {
+        console.error('boardCustomization not available in populateSettingsModal');
+        return;
+    }
     
     const settings = boardCustomization.getSettings();
     

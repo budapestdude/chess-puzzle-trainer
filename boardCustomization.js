@@ -13,6 +13,8 @@ class BoardCustomization {
         
         this.loadSettings();
         this.initializeThemes();
+        
+        console.log('BoardCustomization initialized with settings:', this.settings);
     }
 
     // Board themes with light/dark square colors

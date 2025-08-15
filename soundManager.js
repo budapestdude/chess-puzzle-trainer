@@ -31,6 +31,8 @@ class SoundManager {
             console.warn('Web Audio API not supported:', e);
             this.enabled = false;
         }
+        
+        console.log('SoundManager initialized, enabled:', this.enabled);
     }
 
     playSound(soundName) {
