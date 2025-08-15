@@ -295,6 +295,7 @@ async function initializeTraining() {
     setupAuthEventListeners();
     setupThemeToggle();
     setupSoundToggle();
+    setupBoardSettings();
     
     // Initialize rush mode buttons
     if (typeof initRushMode === 'function') {
@@ -2743,6 +2744,224 @@ function updateSoundButtonText() {
     if (soundToggle) {
         soundToggle.textContent = soundManager.isEnabled() ? '🔊 Sound' : '🔇 Sound';
     }
+}
+
+// Board settings functionality
+function setupBoardSettings() {
+    const settingsBtn = document.getElementById('settingsBtn');
+    const settingsModal = document.getElementById('settingsModal');
+    const settingsClose = document.getElementById('settingsClose');
+    
+    if (settingsBtn && settingsModal) {
+        settingsBtn.addEventListener('click', () => {
+            settingsModal.style.display = 'flex';
+            populateSettingsModal();
+        });
+        
+        settingsClose.addEventListener('click', () => {
+            settingsModal.style.display = 'none';
+        });
+        
+        // Close modal when clicking outside
+        settingsModal.addEventListener('click', (e) => {
+            if (e.target === settingsModal) {
+                settingsModal.style.display = 'none';
+            }
+        });
+        
+        setupSettingsEventListeners();
+    }
+    
+    // Apply saved settings on initialization
+    if (window.boardCustomization) {
+        boardCustomization.applySettings();
+    }
+}
+
+function populateSettingsModal() {
+    if (!window.boardCustomization) return;
+    
+    const settings = boardCustomization.getSettings();
+    
+    // Populate board themes
+    populateThemeGrid();
+    
+    // Populate piece sets
+    populatePieceSets();
+    
+    // Populate board sizes
+    populateBoardSizes();
+    
+    // Populate animation speeds
+    populateAnimationSpeeds();
+    
+    // Set current values
+    document.getElementById('pieceSetSelect').value = settings.pieceSet;
+    document.getElementById('boardSizeSelect').value = settings.boardSize;
+    document.getElementById('animationSpeedSelect').value = settings.animationSpeed;
+    document.getElementById('showCoordinatesToggle').checked = settings.showCoordinates;
+    document.getElementById('highlightMovesToggle').checked = settings.highlightMoves;
+}
+
+function populateThemeGrid() {
+    const themeGrid = document.getElementById('themeGrid');
+    const themes = boardCustomization.getThemes();
+    const currentTheme = boardCustomization.getSettings().boardTheme;
+    
+    themeGrid.innerHTML = '';
+    
+    Object.entries(themes).forEach(([key, theme]) => {
+        const themeOption = document.createElement('div');
+        themeOption.className = 'theme-option';
+        themeOption.style.cssText = `
+            cursor: pointer;
+            text-align: center;
+            padding: 10px;
+            border-radius: 8px;
+            border: 2px solid ${key === currentTheme ? 'var(--primary)' : 'rgba(255,255,255,0.2)'};
+            background: rgba(255,255,255,0.1);
+            transition: all 0.3s ease;
+        `;
+        
+        themeOption.innerHTML = `
+            <div style="width: 60px; height: 60px; margin: 0 auto 8px; border-radius: 4px; position: relative; overflow: hidden;">
+                <div style="position: absolute; top: 0; left: 0; width: 50%; height: 50%; background: ${theme.light};"></div>
+                <div style="position: absolute; top: 0; right: 0; width: 50%; height: 50%; background: ${theme.dark};"></div>
+                <div style="position: absolute; bottom: 0; left: 0; width: 50%; height: 50%; background: ${theme.dark};"></div>
+                <div style="position: absolute; bottom: 0; right: 0; width: 50%; height: 50%; background: ${theme.light};"></div>
+            </div>
+            <div style="font-size: 12px; color: white;">${theme.name}</div>
+        `;
+        
+        themeOption.addEventListener('click', () => {
+            boardCustomization.updateSetting('boardTheme', key);
+            populateThemeGrid(); // Refresh to show new selection
+        });
+        
+        themeOption.addEventListener('mouseenter', () => {
+            themeOption.style.transform = 'scale(1.05)';
+        });
+        
+        themeOption.addEventListener('mouseleave', () => {
+            themeOption.style.transform = 'scale(1)';
+        });
+        
+        themeGrid.appendChild(themeOption);
+    });
+}
+
+function populatePieceSets() {
+    const select = document.getElementById('pieceSetSelect');
+    const pieceSets = boardCustomization.getPieceSets();
+    
+    select.innerHTML = '';
+    Object.entries(pieceSets).forEach(([key, pieceSet]) => {
+        const option = document.createElement('option');
+        option.value = key;
+        option.textContent = pieceSet.name;
+        select.appendChild(option);
+    });
+}
+
+function populateBoardSizes() {
+    const select = document.getElementById('boardSizeSelect');
+    const boardSizes = boardCustomization.getBoardSizes();
+    
+    select.innerHTML = '';
+    Object.entries(boardSizes).forEach(([key, size]) => {
+        const option = document.createElement('option');
+        option.value = key;
+        option.textContent = size.name;
+        select.appendChild(option);
+    });
+}
+
+function populateAnimationSpeeds() {
+    const select = document.getElementById('animationSpeedSelect');
+    const speeds = boardCustomization.getAnimationSpeeds();
+    
+    select.innerHTML = '';
+    Object.entries(speeds).forEach(([key, speed]) => {
+        const option = document.createElement('option');
+        option.value = key;
+        option.textContent = speed.name;
+        select.appendChild(option);
+    });
+}
+
+function setupSettingsEventListeners() {
+    // Piece set change
+    document.getElementById('pieceSetSelect').addEventListener('change', (e) => {
+        boardCustomization.updateSetting('pieceSet', e.target.value);
+    });
+    
+    // Board size change
+    document.getElementById('boardSizeSelect').addEventListener('change', (e) => {
+        boardCustomization.updateSetting('boardSize', e.target.value);
+    });
+    
+    // Animation speed change
+    document.getElementById('animationSpeedSelect').addEventListener('change', (e) => {
+        boardCustomization.updateSetting('animationSpeed', e.target.value);
+    });
+    
+    // Show coordinates toggle
+    document.getElementById('showCoordinatesToggle').addEventListener('change', (e) => {
+        boardCustomization.updateSetting('showCoordinates', e.target.checked);
+    });
+    
+    // Highlight moves toggle
+    document.getElementById('highlightMovesToggle').addEventListener('change', (e) => {
+        boardCustomization.updateSetting('highlightMoves', e.target.checked);
+    });
+    
+    // Reset settings
+    document.getElementById('resetSettingsBtn').addEventListener('click', () => {
+        if (confirm('Reset all board settings to defaults?')) {
+            boardCustomization.resetToDefaults();
+            populateSettingsModal(); // Refresh the modal
+        }
+    });
+    
+    // Export settings
+    document.getElementById('exportSettingsBtn').addEventListener('click', () => {
+        const settings = boardCustomization.exportSettings();
+        const blob = new Blob([settings], { type: 'application/json' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = 'chess-board-settings.json';
+        a.click();
+        URL.revokeObjectURL(url);
+    });
+    
+    // Import settings
+    document.getElementById('importSettingsBtn').addEventListener('click', () => {
+        const input = document.createElement('input');
+        input.type = 'file';
+        input.accept = '.json';
+        input.addEventListener('change', (e) => {
+            const file = e.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    try {
+                        const success = boardCustomization.importSettings(e.target.result);
+                        if (success) {
+                            populateSettingsModal(); // Refresh the modal
+                            alert('Settings imported successfully!');
+                        } else {
+                            alert('Failed to import settings. Please check the file format.');
+                        }
+                    } catch (error) {
+                        alert('Error reading file: ' + error.message);
+                    }
+                };
+                reader.readAsText(file);
+            }
+        });
+        input.click();
+    });
 }
 
 document.addEventListener('DOMContentLoaded', initializeTraining);
