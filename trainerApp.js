@@ -206,6 +206,7 @@ async function updatePuzzleCounter() {
 }
 
 // rushModeState is defined in rushMode.js which loads before this file
+let gamification = null;
 
 async function initializeTraining() {
     // Check if user is logged in, redirect to home if not
@@ -213,6 +214,14 @@ async function initializeTraining() {
     if (!currentUser) {
         window.location.href = '/';
         return;
+    }
+    
+    // Initialize gamification system
+    if (typeof GamificationSystem !== 'undefined') {
+        gamification = new GamificationSystem();
+        updateGamificationUI();
+        setupDailyChallenge();
+        gamification.updateDailyStreak();
     }
     
     userAuth = new UserAuth();
@@ -2785,6 +2794,75 @@ function handlePromotion(promotionPiece) {
     pendingPromotion = null;
 }
 */
+
+// Gamification UI Updates
+function updateGamificationUI() {
+    if (!gamification) return;
+    
+    const stats = gamification.getStats();
+    
+    // Update level and XP
+    const levelElement = document.getElementById('userLevel');
+    const titleElement = document.getElementById('userTitle');
+    const xpBar = document.getElementById('xpBar');
+    const currentXPElement = document.getElementById('currentXP');
+    const requiredXPElement = document.getElementById('requiredXP');
+    
+    if (levelElement) levelElement.textContent = stats.level;
+    if (titleElement) titleElement.textContent = stats.title;
+    
+    if (stats.xpToNextLevel) {
+        const xpProgress = stats.xpToNextLevel;
+        if (xpBar) xpBar.style.width = xpProgress.percentage + '%';
+        if (currentXPElement) currentXPElement.textContent = xpProgress.current;
+        if (requiredXPElement) requiredXPElement.textContent = xpProgress.required;
+    }
+    
+    // Update streak
+    const streakElement = document.getElementById('sidebarStreak');
+    if (streakElement) streakElement.textContent = stats.dailyStreak;
+}
+
+function setupDailyChallenge() {
+    if (!gamification) return;
+    
+    const challenge = gamification.generateDailyChallenge();
+    
+    const descElement = document.getElementById('challengeDescription');
+    const progressBar = document.getElementById('challengeProgress');
+    const progressText = document.getElementById('challengeProgressText');
+    
+    if (descElement) descElement.textContent = challenge.description;
+    if (progressBar) progressBar.style.width = (challenge.progress / challenge.target * 100) + '%';
+    if (progressText) progressText.textContent = `${challenge.progress}/${challenge.target}`;
+}
+
+function onPuzzleSolved(isCorrect, timeSpent) {
+    if (!gamification) return;
+    
+    const userData = JSON.parse(localStorage.getItem('currentChessUser') || '{}');
+    
+    if (isCorrect) {
+        // Award XP for solving
+        const baseXP = 10;
+        const speedBonus = timeSpent < 10 ? 5 : (timeSpent < 30 ? 3 : 0);
+        const difficultyBonus = Math.floor((currentPuzzle?.rating || 1200) / 200);
+        
+        const totalXP = baseXP + speedBonus + difficultyBonus;
+        gamification.awardXP(totalXP, 'Puzzle Solved!');
+        
+        // Update daily challenge progress
+        gamification.updateDailyChallengeProgress('solve_count', 1);
+        if (timeSpent < 30) {
+            gamification.updateDailyChallengeProgress('speed', 1);
+        }
+        
+        // Check for badges
+        gamification.checkAndAwardBadges(userData);
+    }
+    
+    updateGamificationUI();
+}
 
 // Initialize the app when DOM is ready
 $(document).ready(function() {
