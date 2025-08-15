@@ -176,8 +176,6 @@
                     <button id="analyzeBtn" class="control-btn">🔍 Analyze</button>
                     <button id="resetPuzzleBtn" class="control-btn">↺ Reset</button>
                     <button id="solutionBtn" class="control-btn">👁️ Solution</button>
-                    <button id="soundToggle" class="control-btn">🔊 Sound</button>
-                    <button id="settingsBtn" class="control-btn">⚙️ Settings</button>
                     <button id="nextBtn" class="control-btn primary">Next Puzzle →</button>
                 </div>
             </div>
@@ -306,68 +304,7 @@
     </div>
 
     <!-- Board Settings Modal -->
-    <div id="settingsModal" class="modal" style="display: none;">
-        <div class="modal-content" style="background: var(--dark); border: 1px solid rgba(255,255,255,0.1); border-radius: 20px; padding: 40px; max-width: 600px; width: 90%; max-height: 80vh; overflow-y: auto;">
-            <span class="close" id="settingsClose" style="position: absolute; top: 20px; right: 20px; font-size: 28px; color: rgba(255,255,255,0.5); cursor: pointer;">&times;</span>
-            <h2 style="margin-bottom: 30px; color: var(--primary);">⚙️ Board Settings</h2>
-            
-            <!-- Board Theme -->
-            <div class="settings-section" style="margin-bottom: 30px;">
-                <h3 style="margin-bottom: 15px;">🎨 Board Theme</h3>
-                <div class="theme-grid" id="themeGrid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(100px, 1fr)); gap: 10px;">
-                    <!-- Theme options will be populated by JavaScript -->
-                </div>
-            </div>
-
-            <!-- Piece Set -->
-            <div class="settings-section" style="margin-bottom: 30px;">
-                <h3 style="margin-bottom: 15px;">♛ Piece Set</h3>
-                <select id="pieceSetSelect" style="width: 100%; padding: 12px; background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); border-radius: 8px; color: white;">
-                    <!-- Piece set options will be populated by JavaScript -->
-                </select>
-            </div>
-
-            <!-- Board Size -->
-            <div class="settings-section" style="margin-bottom: 30px;">
-                <h3 style="margin-bottom: 15px;">📏 Board Size</h3>
-                <select id="boardSizeSelect" style="width: 100%; padding: 12px; background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); border-radius: 8px; color: white;">
-                    <!-- Board size options will be populated by JavaScript -->
-                </select>
-            </div>
-
-            <!-- Animation Speed -->
-            <div class="settings-section" style="margin-bottom: 30px;">
-                <h3 style="margin-bottom: 15px;">⚡ Animation Speed</h3>
-                <select id="animationSpeedSelect" style="width: 100%; padding: 12px; background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); border-radius: 8px; color: white;">
-                    <!-- Animation speed options will be populated by JavaScript -->
-                </select>
-            </div>
-
-            <!-- Toggles -->
-            <div class="settings-section" style="margin-bottom: 30px;">
-                <h3 style="margin-bottom: 15px;">🔧 Display Options</h3>
-                <div style="margin-bottom: 15px;">
-                    <label style="display: flex; align-items: center; cursor: pointer;">
-                        <input type="checkbox" id="showCoordinatesToggle" style="margin-right: 10px;">
-                        <span>Show board coordinates</span>
-                    </label>
-                </div>
-                <div style="margin-bottom: 15px;">
-                    <label style="display: flex; align-items: center; cursor: pointer;">
-                        <input type="checkbox" id="highlightMovesToggle" style="margin-right: 10px;">
-                        <span>Highlight possible moves</span>
-                    </label>
-                </div>
-            </div>
-
-            <!-- Action Buttons -->
-            <div class="settings-actions" style="display: flex; gap: 10px; margin-top: 30px;">
-                <button id="resetSettingsBtn" class="btn" style="flex: 1; background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2);">Reset to Defaults</button>
-                <button id="exportSettingsBtn" class="btn" style="flex: 1; background: rgba(0, 212, 255, 0.2); border: 1px solid var(--primary);">Export Settings</button>
-                <button id="importSettingsBtn" class="btn" style="flex: 1; background: rgba(0, 212, 255, 0.2); border: 1px solid var(--primary);">Import Settings</button>
-            </div>
-        </div>
-    </div>
+    <!-- Settings modal removed - settings now managed in profile page -->
 
     <!-- Scripts -->
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
